@@ -34,8 +34,10 @@ export default class ReportGraphScreen extends React.Component {
     let data = [];
     let length = 0;
 
-    for(let i=0;i<this.props.data.length;i++) {
-      data.push({data: this.props.data[i].vals, color: colors[i]});
+    for (let i = 0; i < this.props.data.length; i++) {
+      // if (i <= 2) {
+        data.push({data: this.props.data[i].vals, color: colors[i]});
+      // }
       let vals = this.props.data[i].vals;
       for(let y=0;y<vals.length;y++) {
         let val = vals[y].toString();
@@ -49,7 +51,7 @@ export default class ReportGraphScreen extends React.Component {
     const chartPaddingLeft = 60;
     const chartPaddingTop = 40;
 
-    console.log('length: ' + length, this.props);
+    console.log('length: ' + length, data);
     length = length + 3;
     // console.log('props: ' + JSON.stringify(this.props));
     return (
@@ -128,39 +130,46 @@ export default class ReportGraphScreen extends React.Component {
                 tickLabels: {fontSize: 8, padding: 5, stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5}
               }}
             />
-            <VictoryGroup
-              data={data[0].data.map((v, i) => ({x: this.props.datax[i], y: v, label: v}))}
-              labelComponent={<VictoryTooltip renderInPortal={false} />}
-            >
-              <VictoryLine
-                interpolation="monotoneX"
-                style={{ data: { stroke: "orange" }}}
-              />
-              <VictoryScatter
-                size={6}
-                style={{ data: { fill: "tomato" }}}
-                events={[{
-                  target: "data",
-                  eventHandlers: {
-                    onPressIn: (targetProps) => {
-                      return [
-                        {
-                          target: "labels",
-                          mutation: () => {
-                            return {active: true};
-                          }
-                        }, {
-                          target: "data",
-                          mutation: () => {
-                            return { size: 8 };
-                          }
+            {
+              data.map((report, index) => {
+                return (
+                  <VictoryGroup
+                    key={index.toString()}
+                    data={this.props.datax.map((v, i) => ({x: v, y: report.data[i] || 0, label: report.data[i] || 0}))}
+                    labelComponent={<VictoryTooltip renderInPortal={false} />}
+                  >
+                    <VictoryLine
+                      interpolation="monotoneX"
+                      style={{ data: { stroke: report.color, opacity: 0.5 }}}
+                    />
+                    <VictoryScatter
+                      size={6}
+                      style={{ data: { fill: report.color }}}
+                      events={[{
+                        target: "data",
+                        eventHandlers: {
+                          onPressIn: (targetProps) => {
+                            return [
+                              {
+                                target: "labels",
+                                mutation: () => {
+                                  return {active: true};
+                                }
+                              }, {
+                                target: "data",
+                                mutation: () => {
+                                  return { size: 8 };
+                                }
+                              }
+                            ];
+                          },
                         }
-                      ];
-                    },
-                  }
-                }]}
-              />
-            </VictoryGroup>
+                      }]}
+                    />
+                  </VictoryGroup>
+                )
+              })
+            }
           </VictoryChart>
         </Svg>
       </View>

@@ -39,8 +39,11 @@
     "react-native-svg": "8.0.8"
   },
   "scripts": {
-    "start": "%exp% start",
-    "restart": "%exp% r -c",
-    "android": "%exp% android"
+    "start": "%expo-cli% start",
+    "android": "%expo-cli% start --android",
+    "ios": "%expo-cli% start --ios",
+    "build:android": "%expo% build:android",
+    "build:ios": "%expo% build:ios",
+    "eject": "%expo-cli% eject"
   }
 }
