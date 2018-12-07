@@ -5,8 +5,8 @@ import Config from './../constants/Config'
 import I18n from './../Utilites/Localization'
 import { observer } from 'mobx-react/native';
 import Common from './../Utilites/Common'
-import { MapView } from 'expo';
-import { AnimatedRegion } from 'react-native-maps';
+// import { MapView } from 'expo';
+import MapView, { AnimatedRegion, Marker, UrlTile } from 'react-native-maps';
 import Network, { searchPharms } from './../Utilites/Network'
 import Search from 'react-native-search-box';
 
@@ -19,78 +19,69 @@ export default class AptekaMapView extends React.Component {
     pic:  '',
     showInfo: false,
 
-    latitude: Config.latitude,
-    longitude: Config.longitude,
-    routeCoordinates: [],
-    prevLatLng: {},
-    coordinate: new AnimatedRegion({
-      latitude: Config.latitude,
-      longitude: Config.longitude
-    }),
-    mapIsReady: false
+    curAng: 45,
+    tracker: false,
+    prevPos: null,
+    curPos: null,
   };
 
-  componentWillMount() {
-    console.log('will');
+  constructor(props) {
+    super(props);
+  }
+
+  componentDidMount() {
     this.watchID = navigator.geolocation.watchPosition(
       position => {
-        console.log('position', position);
-        const { coordinate, routeCoordinates, distanceTravelled } =   this.state;
         const { latitude, longitude } = position.coords;
 
         const newCoordinate = {
           latitude,
           longitude
         };
-        this.navigateMap(newCoordinate);
-        this.setState({
-          latitude,
-          longitude,
-          routeCoordinates: routeCoordinates.concat([newCoordinate]),
-          prevLatLng: newCoordinate
-        });
+        this.changePosition(newCoordinate);
       },
       error => console.log(error),
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 1000 }
     );
   }
 
-  componentDidMount() {
-    this.refs.map.fitToElements(true);
-    console.log('init');
-  }
-
-  constructor(props) {
-    super(props);
-  }
-
-  navigateMap = (newCoordinate) => {
-    console.log(Platform.OS , newCoordinate);
-    const { coordinate } = this.state;
-    if (Platform.OS === "android") {
-      if (this.refs.map) {
-        console.log(this.refs.map, this.refs.map._component);
-        this.refs.map._component.animateMarkerToCoordinate(
-          newCoordinate,
-          500
-        );
-      }
-    } else {
-      coordinate.timing(newCoordinate).start();
+  componentWillUnmount() {
+    if (this.watchID) {
+      navigator.geolocation.clearWatch(this.watchID);
     }
+  }
+
+  changePosition = (newCoordinate) => {
+    let state = { prevPos: this.state.curPos, curPos: newCoordinate };
+    if (!this.state.tracker) {
+      state.tracker = true;
+    }
+    const tracker = this.state.tracker;
+    this.setState(state, () => {
+      if (!tracker) {
+        this.navigateMap(newCoordinate, 1);
+      }
+    });
+    // this.updateMap();
   };
 
-  onMapReady = () => {
-    const { latitude, longitude } = this.state;
-    if (!this.state.mapIsReady) {
-      this.setState({ mapIsReady: true }, () => {
-        const newCoordinate = {
-          latitude,
-          longitude
-        };
-        this.navigateMap(newCoordinate);
-      });
-    }
+  navigateMap = (newCoordinate) => {
+    console.log('navigate');
+    this.refs.map._component.animateToCoordinate(newCoordinate || this.state.curPos, 1);
+  };
+
+  getRotation = (prevPos, curPos) => {
+    if (!prevPos) return 0;
+    const xDiff = curPos.latitude - prevPos.latitude;
+    const yDiff = curPos.longitude - prevPos.longitude;
+    return (Math.atan2(yDiff, xDiff)) / Math.PI;
+  };
+
+  updateMap = () => {
+    console.log('update');
+    const { curPos, prevPos, curAng } = this.state;
+    const curRot = this.getRotation(prevPos, curPos);
+    this.refs.map.animateToNavigation(curPos, curRot, curAng);
   };
 
   onSearch = (text) => {
@@ -182,7 +173,7 @@ export default class AptekaMapView extends React.Component {
     for(var i = 0; i < Network.pharmsList.length; i++) {
 
       if(Platform.OS === "android") {
-        markers.push(<MapView.Marker
+        markers.push(<Marker
           key={i}
           id={i}
           identifier={i.toString()}
@@ -194,9 +185,9 @@ export default class AptekaMapView extends React.Component {
         }}
         onPress={(data) => this.onMPress(data)}>
 
-        </MapView.Marker>);
+        </Marker>);
       } else {
-        markers.push(<MapView.Marker
+        markers.push(<Marker
           key={i}
           id={i}
           identifier={i.toString()}
@@ -215,7 +206,7 @@ export default class AptekaMapView extends React.Component {
                 height: Common.getLengthByIPhone7(66),
               }} />
           </TouchableWithoutFeedback>
-        </MapView.Marker>);
+        </Marker>);
       }
 
       latitude = Network.pharmsList[i].wpos;
@@ -296,7 +287,7 @@ export default class AptekaMapView extends React.Component {
         backgroundColor: '#FDE9D0',
         width: Common.getLengthByIPhone7(0),
       }}>
-        <MapView
+        <MapView.Animated
           ref="map"
           mapType="none"
           style={{
@@ -309,25 +300,26 @@ export default class AptekaMapView extends React.Component {
             latitudeDelta: 0.0022,
             longitudeDelta: 0.0021,
           }}
-          // onMapReady={this.onMapReady}
           onPress={() => this.onMapClick()}
           onRegionChangeComplete={this.reloadEntities}
           onMarkerPress={(data) => this.onMarkerPress(data)}>
-            <MapView.UrlTile
+            <UrlTile
               urlTemplate={Config.urlTile}
             />
-            <MapView.Marker
-              coordinate={{
-                latitude: this.state.latitude,
-                longitude: this.state.longitude,
-              }}
-            >
-              <View style={{width:20, height:20, borderRadius:10, backgroundColor:'white', justifyContent:'center',alignItems:'center'}}>
-                <View style={{width:14, height:14, borderRadius:7, backgroundColor:'blue'}} />
-              </View>
-            </MapView.Marker>
+            {
+              this.state.curPos ?
+                <Marker.Animated
+                  coordinate={this.state.curPos}
+                  ref={el => this.marker = el}
+                >
+                  <View style={{width:20, height:20, borderRadius:10, backgroundColor:'white', justifyContent:'center',alignItems:'center'}}>
+                    <View style={{width:14, height:14, borderRadius:7, backgroundColor:'blue'}} />
+                  </View>
+                </Marker.Animated>
+              : null
+            }
           {markers}
-        </MapView>
+        </MapView.Animated>
         <View style={{
           position: 'absolute',
           height: Common.getLengthByIPhone7(42),
@@ -376,6 +368,22 @@ export default class AptekaMapView extends React.Component {
             height: Common.getLengthByIPhone7(26),
           }} />
         </View>
+        {
+          this.state.curPos ?
+            <TouchableOpacity style={{
+              position: 'absolute',
+              height: Common.getLengthByIPhone7(42),
+              right: Common.getLengthByIPhone7(16),
+              top: Common.getLengthByIPhone7(93),
+            }} onPress={() => this.navigateMap()}>
+              <Image source={require('./../assets/ic-location.png')} style={{
+                resizeMode: 'contain',
+                width: Common.getLengthByIPhone7(40),
+                height: Common.getLengthByIPhone7(40),
+              }} />
+            </TouchableOpacity>
+          : null
+        }
         {info}
     </View>
     );

@@ -1,13 +1,12 @@
 import I18n from 'ex-react-native-i18n';
-import Expo from 'expo';
 import { DangerZone } from 'expo';
 
 I18n.initAsync = async () => {
-  const locale = await Expo.DangerZone.Localization.getCurrentLocaleAsync();
+  const locale = await Expo.Localization.locale;
   I18n.locale = (locale) ? locale.replace(/_/, '-') : '';
-}
+};
 
-I18n.fallbacks = true
+I18n.fallbacks = true;
 I18n.translations = {
   en: {
     //экран входа
@@ -53,6 +52,6 @@ I18n.translations = {
     onlineNow: 'Online сейчас',
     location: 'Местонахождение',
   }
-}
+};
 
 export default I18n;

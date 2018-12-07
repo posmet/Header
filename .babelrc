@@ -1,8 +1,16 @@
 {
-  "presets": ["babel-preset-expo"],
+  "presets": ["module:metro-react-native-babel-preset"],
+  "plugins": [
+    ["@babel/plugin-proposal-decorators", { "legacy": true }]
+  ],
   "env": {
     "development": {
-      "plugins": ["transform-react-jsx-source"]
+      "plugins": []
+    },
+    "production": {
+      "plugins": [
+        "transform-remove-console"
+      ]
     }
   }
 }

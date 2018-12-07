@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, Text, Image, View, Dimensions, ListView, TouchableOpacity, ScrollView } from 'react-native';
+import { Platform, Text, Image, View, Dimensions, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import Colors from './../constants/Colors';
 import Config from './../constants/Config'
 import I18n from './../Utilites/Localization'
@@ -17,13 +17,7 @@ let rows = [
   {id: 1},
   {id: 2},
   {id: 3},
-]
-
-// Row comparison function
-const rowHasChanged = (r1, r2) => r1.id !== r2.id
-
-// DataSource template object
-const ds = new ListView.DataSource({rowHasChanged})
+];
 
 let colors = ['#f44336', '#9c27b0', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722', '#795548', '#9e9e9e', '#607d8b'];
 
@@ -33,24 +27,25 @@ export default class CommonGraphScreen extends React.Component {
   state = {
     visible: true,
     report: null,
-    dataSource: ds.cloneWithRows(rows),
+    dataSource: rows,
     type: 0,
     isPortrait: true,
+    scrollEnabled: true
   };
 
   componentWillUnmount() {
-    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.PORTRAIT);
+    Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
     Dimensions.removeEventListener("change", this.orientationChange);
   }
 
   isPortrait = () => {
     const dim = Dimensions.get('screen');
     return dim.height >= dim.width;
-  }
+  };
 
   componentWillMount() {
 
-    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.ALL);
+    Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.ALL);
     Dimensions.addEventListener("change", this.orientationChange);
 
     this.setState({
@@ -73,14 +68,14 @@ export default class CommonGraphScreen extends React.Component {
         visible: false,
         report: report,
         type: type,
-        dataSource: ds.cloneWithRows(rows),
+        dataSource: rows,
       });
     })
     .catch((err) => {
       this.setState({
         visible: false,
         report: null,
-        dataSource: ds.cloneWithRows(rows),
+        dataSource: rows,
       });
     });
   }
@@ -93,47 +88,48 @@ export default class CommonGraphScreen extends React.Component {
     console.log('orientationChange');
     this.setState({
       isPortrait: this.isPortrait(),
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
   onGraphClick = () => {
     this.setState({
       type: 0,
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
   onHistoClick = () => {
     this.setState({
       type: 1,
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
   onPieClick = () => {
     this.setState({
       type: 2,
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
   onTableClick = () => {
     this.setState({
       type: 3,
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
-  renderRow = (rowData) => {
-    if(this.state.report == null) {
+  renderRow = (row) => {
+    let rowData = row.item;
+    if (this.state.report == null) {
       return null;
     } else {
-      if(rowData.id == 1) {
+      if (rowData.id == 1) {
 
         let view = null;
         if(this.state.type == 0) {
-          view = (<ReportGraphView rowx={this.state.report.rowx} rowy={this.state.report.rowy} data={this.state.report.data} datax={this.state.report.datax}/>);
+          view = (<ReportGraphView toggleScrolling={this.toggleScrolling} rowx={this.state.report.rowx} rowy={this.state.report.rowy} data={this.state.report.data} datax={this.state.report.datax}/>);
         } else if(this.state.type == 1) {
           view = (<ReportHistogramView rowx={this.state.report.rowx} rowy={this.state.report.rowy} data={this.state.report.data} datax={this.state.report.datax}/>);
         } else if(this.state.type == 2) {
@@ -247,7 +243,7 @@ export default class CommonGraphScreen extends React.Component {
         </View>);
       } else {
 
-        if(this.state.type == 3) {
+        if (this.state.type == 3) {
           return (<ReportTableView data={this.state.report.data} datax={this.state.report.datax}/>);
         }
 
@@ -296,14 +292,18 @@ export default class CommonGraphScreen extends React.Component {
         </View>);
       }
     }
-  }
+  };
+
+  toggleScrolling = () => {
+    this.setState({scrollEnabled: !this.state.scrollEnabled});
+  };
 
   render() {
 
     // console.log('screen: ' + JSON.stringify(Dimensions.get('screen')));
     // console.log('window: ' + JSON.stringify(Dimensions.get('window')));
 
-    if(this.state.isPortrait) {
+    if (this.state.isPortrait) {
       return (
         <View style={{
           flex: 1,
@@ -328,7 +328,7 @@ export default class CommonGraphScreen extends React.Component {
               {this.props.navigation.state.params.name}
             </Text>
           </View>
-          <ListView
+          <FlatList
             style={{
               backgroundColor: 'transparent',
               flex: 1,
@@ -338,10 +338,11 @@ export default class CommonGraphScreen extends React.Component {
               alignItems: 'center',
             }}
             enableEmptySections={true}
-            dataSource={this.state.dataSource}
-            renderRow={this.renderRow}
+            data={this.state.dataSource}
+            renderItem={this.renderRow}
             removeClippedSubviews={false}
             bounces={true}
+            keyExtractor={(item, index) => `cgc-${item.id}`}
           />
           <View style={{
             position: 'absolute',
@@ -417,7 +418,7 @@ export default class CommonGraphScreen extends React.Component {
             height: Common.getLengthByIPhone7(26),
           }} />
         </TouchableOpacity>);
-        graphView = (<ReportGraphView rowx={this.state.report.rowx} rowy={this.state.report.rowy} data={this.state.report.data} datax={this.state.report.datax}/>);
+        graphView = (<ReportGraphView toggleScrolling={this.toggleScrolling} rowx={this.state.report.rowx} rowy={this.state.report.rowy} data={this.state.report.data} datax={this.state.report.datax}/>);
       } else if(this.state.type == 1) {
         histo = (<TouchableOpacity onPress={() => this.onHistoClick()} style={{
           marginRight: Common.getLengthByIPhone7(24),
@@ -539,7 +540,7 @@ export default class CommonGraphScreen extends React.Component {
           <ScrollView style={{
             flex: 1,
             width: Dimensions.get('window').width,
-          }}>
+          }} scrollEnabled={this.state.scrollEnabled}>
 
             <View style={{
               flexDirection: flexDirection,

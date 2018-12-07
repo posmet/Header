@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, Text, Image, View, Dimensions, ListView, TouchableOpacity, ScrollView } from 'react-native';
+import { Platform, Text, Image, View, Dimensions, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import Colors from './../constants/Colors';
 import Config from './../constants/Config'
 import I18n from './../Utilites/Localization'
@@ -17,13 +17,7 @@ let rows = [
   {id: 1},
   {id: 2},
   {id: 3},
-]
-
-// Row comparison function
-const rowHasChanged = (r1, r2) => r1.id !== r2.id
-
-// DataSource template object
-const ds = new ListView.DataSource({rowHasChanged})
+];
 
 let colors = ['#f44336', '#9c27b0', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722', '#795548', '#9e9e9e', '#607d8b'];
 
@@ -33,19 +27,19 @@ export default class AptekaGraphScreen extends React.Component {
   state = {
     visible: true,
     report: null,
-    dataSource: ds.cloneWithRows(rows),
+    dataSource: rows,
     type: 0,
     isPortrait: true,
   };
 
   componentWillUnmount() {
-    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.PORTRAIT);
+    Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
     Dimensions.removeEventListener("change", this.orientationChange);
   }
 
   componentWillMount() {
 
-    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.ALL);
+    Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.ALL);
     Dimensions.addEventListener("change", this.orientationChange);
     // Dimensions.addEventListener("change", () => {
     //   console.log('orientation changed');
@@ -72,14 +66,14 @@ export default class AptekaGraphScreen extends React.Component {
         visible: false,
         report: report,
         type: type,
-        dataSource: ds.cloneWithRows(rows),
+        dataSource: rows,
       });
     })
     .catch((err) => {
       this.setState({
         visible: false,
         report: null,
-        dataSource: ds.cloneWithRows(rows),
+        dataSource: rows,
       });
     });
   }
@@ -91,46 +85,47 @@ export default class AptekaGraphScreen extends React.Component {
   isPortrait = () => {
     const dim = Dimensions.get('screen');
     return dim.height >= dim.width;
-  }
+  };
 
   orientationChange = () => {
     console.log('orientationChange');
     this.setState({
       isPortrait: this.isPortrait(),
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
   onGraphClick = () => {
     this.setState({
       type: 0,
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
   onHistoClick = () => {
     this.setState({
       type: 1,
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
   onPieClick = () => {
     this.setState({
       type: 2,
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
   onTableClick = () => {
     this.setState({
       type: 3,
-      dataSource: ds.cloneWithRows(rows),
+      dataSource: rows,
     });
-  }
+  };
 
-  renderRow = (rowData) => {
-    if(this.state.report == null) {
+  renderRow = (row) => {
+    let rowData = row.item;
+    if (this.state.report == null) {
       return null;
     } else {
       if(rowData.id == 1) {
@@ -344,7 +339,7 @@ export default class AptekaGraphScreen extends React.Component {
               {addr}
             </Text>
           </View>
-          <ListView
+          <FlatList
             style={{
               backgroundColor: 'transparent',
               flex: 1,
@@ -354,9 +349,10 @@ export default class AptekaGraphScreen extends React.Component {
               alignItems: 'center',
             }}
             enableEmptySections={true}
-            dataSource={this.state.dataSource}
-            renderRow={this.renderRow}
+            data={this.state.dataSource}
+            renderItem={this.renderRow}
             removeClippedSubviews={false}
+            keyExtractor={(item, index) => index.toString()}
             bounces={true}
           />
           <View style={{

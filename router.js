@@ -2,7 +2,7 @@
 import React from "react";
 import { isIphoneX } from 'react-native-iphone-x-helper'
 import { Platform, StatusBar, Image, Dimensions } from "react-native";
-import { createStackNavigator, createBottomTabNavigator, NavigationActions, TabView, TabBarBottom } from "react-navigation";
+import { createStackNavigator, createAppContainer, createBottomTabNavigator, NavigationActions, TabView, TabBarBottom } from "react-navigation";
 
 import Colors from './constants/Colors';
 import Config from './constants/Config'
@@ -493,7 +493,7 @@ export const createRootNavigator = (variant) => {
     route = 'SignedOut';
   }
 
-  return createStackNavigator(
+  return createAppContainer(createStackNavigator(
     {
       SignedIn: {
         screen: SignedIn,
@@ -513,5 +513,5 @@ export const createRootNavigator = (variant) => {
       mode: "modal",
       initialRouteName: route
     }
-  );
+  ));
 };

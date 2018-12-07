@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, Text, Image, View, Dimensions, ListView, TouchableOpacity, ScrollView, Animated, Linking } from 'react-native';
+import { Platform, Text, Image, View, Dimensions, FlatList, TouchableOpacity, ScrollView, Animated, Linking } from 'react-native';
 import Colors from './../constants/Colors';
 import Config from './../constants/Config'
 import I18n from './../Utilites/Localization'
@@ -23,12 +23,6 @@ let rows = [
   {id: 8},
 ]
 
-// Row comparison function
-const rowHasChanged = (r1, r2) => r1.id !== r2.id
-
-// DataSource template object
-const ds = new ListView.DataSource({rowHasChanged})
-
 @observer
 export default class AptekaScreen extends React.Component {
 
@@ -36,7 +30,7 @@ export default class AptekaScreen extends React.Component {
 
   state = {
     visible: true,
-    dataSource: ds.cloneWithRows(rows),
+    dataSource: rows,
     apteka: null,
   };
 
@@ -46,14 +40,14 @@ export default class AptekaScreen extends React.Component {
       this.setState({
         apteka: apteka,
         visible: false,
-        dataSource: ds.cloneWithRows(rows),
+        dataSource: rows,
       });
     })
     .catch((err) => {
       this.setState({
         apteka: null,
         visible: false,
-        dataSource: ds.cloneWithRows(rows),
+        dataSource: rows,
       });
     });
   }
@@ -81,12 +75,12 @@ export default class AptekaScreen extends React.Component {
     }).catch(err => console.error('An error occurred', err));
   };
 
-  renderRow = (rowData) => {
+  renderRow = ({item}) => {
 
     if(this.state.apteka == null) {
       return null;
     } else {
-      if(rowData.id == 1) {
+      if(item.id == 1) {
 
         let position = Animated.divide(this.scrollX, width);
         let img = [];
@@ -166,7 +160,7 @@ export default class AptekaScreen extends React.Component {
             })}
           </View>
         </View>);
-      } else if(rowData.id == 2) {
+      } else if(item.id == 2) {
         let phones = [];
         let email = '';
 
@@ -276,7 +270,7 @@ export default class AptekaScreen extends React.Component {
             )) }
           </Text>
         </View>);
-      } else if(rowData.id == 3) {
+      } else if(item.id == 3) {
 
         let viruch = '';
         let check = '';
@@ -346,7 +340,7 @@ export default class AptekaScreen extends React.Component {
             </Text>
           </View>
         </View>);
-      } else if(rowData.id == 4) {
+      } else if(item.id == 4) {
 
         let staff = '';
         let name = '';
@@ -450,7 +444,7 @@ export default class AptekaScreen extends React.Component {
             )) }
           </View>
         </View>);
-      } else if(rowData.id == 5) {
+      } else if(item.id == 5) {
 
         let personal = '';
         let square = '';
@@ -647,7 +641,7 @@ export default class AptekaScreen extends React.Component {
             </View>
           </View>
         </View>);
-      } else if(rowData.id == 6) {
+      } else if(item.id == 6) {
 
         let day1H1 = '';
         let day1H2 = '';
@@ -1009,7 +1003,7 @@ export default class AptekaScreen extends React.Component {
             </Text>
           </View>
         </View>);
-      } else if(rowData.id == 7) {
+      } else if(item.id == 7) {
         return (<View style={{
           width: Common.getLengthByIPhone7(0),
           height: Common.getLengthByIPhone7(55),
@@ -1109,7 +1103,7 @@ export default class AptekaScreen extends React.Component {
         alignItems: 'center',
         backgroundColor: Colors.backgroundColor,
       }}>
-        <ListView
+        <FlatList
           style={{
             flex: 1,
             backgroundColor: 'transparent',
@@ -1118,9 +1112,10 @@ export default class AptekaScreen extends React.Component {
             alignItems: 'center',
           }}
           enableEmptySections={true}
-          dataSource={this.state.dataSource}
-          renderRow={this.renderRow}
+          data={this.state.dataSource}
+          renderItem={this.renderRow}
           removeClippedSubviews={false}
+          keyExtractor={(item, index) => index.toString()}
           bounces={true}
         />
         <View style={{
