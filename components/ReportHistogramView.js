@@ -9,7 +9,10 @@ import {
   PieChart,
   ProgressChart,
   ContributionGraph
-} from 'react-native-chart-kit'
+} from 'react-native-chart-kit';
+
+import { VictoryChart, VictoryTheme, VictoryAxis, VictoryVoronoiContainer, VictoryZoomContainer, VictoryContainer, VictoryLabel, VictoryTooltip, VictoryGroup, VictoryStack, VictoryBar } from 'victory-native';
+import Svg from 'react-native-svg';
 
 let colors = ['#f44336', '#9c27b0', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722', '#795548', '#9e9e9e', '#607d8b'];
 
@@ -34,7 +37,9 @@ export default class ReportHistogramView extends React.Component {
     let length = 0;
 
     for(let i=0;i<this.props.data.length;i++) {
-      data.push({data: this.props.data[i].vals, color: colors[i]});
+      // if (i <= 1) {
+        data.push({data: this.props.data[i].vals, color: colors[i]});
+      // }
       let vals = this.props.data[i].vals;
       for(let y=0;y<vals.length;y++) {
         let val = vals[y].toString();
@@ -44,8 +49,13 @@ export default class ReportHistogramView extends React.Component {
       }
     }
 
-    console.log('length: ' + length);
+    console.log('length: ' + length, data);
     length = length + 3;
+
+    const chartWidth = Dimensions.get('window').width - Common.getLengthByIPhone7(20);
+    const chartPaddingLeft = 60;
+    const chartPaddingTop = 45;
+    const barWidth = 3;
 
     // for(let i=0;i<this.props.data.length;i++) {
     //   data.push({data: this.props.data[i].vals, color: colors[i]});
@@ -57,10 +67,11 @@ export default class ReportHistogramView extends React.Component {
         justifyContent: 'flex-start',
         alignItems: 'center',
         backgroundColor: 'transparent',
-        width: Common.getLengthByIPhone7(0),
+        // width: Common.getLengthByIPhone7(0),
+        width: Dimensions.get('window').width,
         height: Common.getLengthByIPhone7(221),
       }}>
-        <BarChart
+        {/*<BarChart
           data={{
             labels: this.props.datax,
             datasets: data
@@ -81,7 +92,113 @@ export default class ReportHistogramView extends React.Component {
 
             }
           }}
-        />
+        />*/}
+        <Svg width={chartWidth} height={Common.getLengthByIPhone7(221)} viewBox={`0 0 ${chartWidth} ${Common.getLengthByIPhone7(221)}`} style={{ width: "100%", height: "auto" }}>
+          <VictoryChart
+            standalone={false}
+            width={chartWidth}
+            height={Common.getLengthByIPhone7(221)}
+            containerComponent={<VictoryContainer
+              disableContainerEvents={true}
+              onTouchStart={this.props.toggleScrolling}
+              onTouchEnd={this.props.toggleScrolling}
+            />}
+            theme={VictoryTheme.material}
+            animate={{
+              duration: 1000,
+              onLoad: { duration: 500 }
+            }}
+            padding={{left: chartPaddingLeft, bottom: 50, top: chartPaddingTop, right: 15}}
+          >
+            <VictoryAxis
+              crossAxis
+              fixLabelOverlap={true}
+              label={this.props.rowx}
+              tickCount={10}
+              tickValues={this.props.datax}
+              style={{
+                axis: {stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5},
+                axisLabel: {fontSize: 12, padding: 30, stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5},
+                ticks: {stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5},
+                tickLabels: {fontSize: 8, padding: 5, stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5}
+              }}
+              axisLabelComponent={<VictoryLabel x={0} transform={`translate(${chartWidth - 30})`} textAnchor="start" />}
+            />
+            <VictoryAxis
+              crossAxis
+              dependentAxis
+              axisLabelComponent={<VictoryLabel y={chartPaddingTop - 15} x={chartPaddingLeft - 20} textAnchor="end" />}
+              label={this.props.rowy}
+              style={{
+                axis: {stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5},
+                axisLabel: {fontSize: 12, padding: 30, stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5},
+                ticks: {stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5},
+                tickLabels: {fontSize: 8, padding: 5, stroke: Colors.mainColor, strokeWidth: 0, opacity: 0.5}
+              }}
+            />
+            <VictoryGroup
+              standalone={false}
+              offset={5}
+              colorScale={colors}
+              padding={{left: chartPaddingLeft, bottom: 50, top: chartPaddingTop, right: 15}}
+              labelComponent={<VictoryTooltip renderInPortal={false} />}
+            >
+              {
+                data.map((report, index) => {
+                  return (
+                    <VictoryBar
+                      barWidth={barWidth}
+                      key={index.toString()}
+                      style={{
+                        labels: {
+                          fontSize: 10
+                        }
+                      }}
+                      data={this.props.datax.map((v, i) => ({x: v, y: report.data[i] || 0, label: report.data[i] || 0}))}
+                      events={[{
+                        target: "data",
+                        eventHandlers: {
+                          onPressIn: (targetProps) => {
+                            return [
+                              {
+                                target: "labels",
+                                mutation: () => {
+                                  return {active: true};
+                                }
+                              },
+                              {
+                                target: "data",
+                                mutation: () => {
+                                  return {barWidth: barWidth*2};
+                                }
+                              }
+                            ];
+                          },
+                          onPressOut: () => {
+                            return [
+                              {
+                                target: "labels",
+                                mutation: () => {
+                                  return {active: false};
+                                }
+                              },
+                              {
+                                target: "data",
+                                mutation: () => {
+                                  return {barWidth: barWidth};
+                                }
+                              }
+                            ];
+                          },
+                        }
+                      }]}
+                    />
+                  )
+                })
+              }
+            </VictoryGroup>
+          </VictoryChart>
+        </Svg>
       </View>
     );
   }
