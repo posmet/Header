@@ -15,7 +15,6 @@ class CustomLabel extends React.Component {
     const { datum, y, style } = this.props;
     const tooltipStyle = Object.assign({}, style);
     tooltipStyle.fill = 'black';
-    console.log(this.props);
     return (
       <G>
         <VictoryLabel
