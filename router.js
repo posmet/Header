@@ -493,7 +493,7 @@ export const createRootNavigator = (variant) => {
     route = 'SignedOut';
   }
 
-  return createAppContainer(createStackNavigator(
+  return createStackNavigator(
     {
       SignedIn: {
         screen: SignedIn,
@@ -513,5 +513,5 @@ export const createRootNavigator = (variant) => {
       mode: "modal",
       initialRouteName: route
     }
-  ));
+  );
 };

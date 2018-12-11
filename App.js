@@ -21,7 +21,7 @@ export default class App extends React.Component {
 
   componentWillMount() {
     I18n.initAsync();
-    Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT_UP);
+    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.PORTRAIT_UP);
     AsyncStorage.getItem('@MySuperStore:login')
     .then((username) => {
       AsyncStorage.getItem('@MySuperStore:password')

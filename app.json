@@ -4,7 +4,7 @@
     "description": "This project is really great.",
     "slug": "apteka",
     "privacy": "public",
-    "sdkVersion": "31.0.0",
+    "sdkVersion": "30.0.0",
     "platforms": ["ios", "android"],
     "version": "1.0.0",
     "orientation": "portrait",
@@ -41,7 +41,6 @@
       "package": "sa.vorobyev.gosapteka",
       "versionCode": 10,
       "permissions": [
-        "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "android.permission.INTERNET",
         "com.google.android.c2dm.permission.RECEIVE"

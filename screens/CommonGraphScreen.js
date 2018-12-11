@@ -34,7 +34,7 @@ export default class CommonGraphScreen extends React.Component {
   };
 
   componentWillUnmount() {
-    Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
+    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.PORTRAIT);
     Dimensions.removeEventListener("change", this.orientationChange);
   }
 
@@ -45,7 +45,7 @@ export default class CommonGraphScreen extends React.Component {
 
   componentWillMount() {
 
-    Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.ALL);
+    Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.ALL);
     Dimensions.addEventListener("change", this.orientationChange);
 
     this.setState({
@@ -361,7 +361,7 @@ export default class CommonGraphScreen extends React.Component {
       );
     } else {
       let width = Common.getLengthByIPhone7(220);
-      let flexDirection = 'row';
+      let flexDirection = 'column';
       let graphView = null;
       let tableView = null;
       let legendView = [];
@@ -547,12 +547,13 @@ export default class CommonGraphScreen extends React.Component {
               flex: 1,
               width: Dimensions.get('window').width,
               justifyContent: 'space-between',
-              alignItems: 'flex-end',
+              alignItems: 'flex-start',
             }}>
               {graphView}
               <View style={{
                 width: width,
                 alignItems: alignItems,
+                marginLeft: Common.getLengthByIPhone7(16)
               }}>
                 <View style={{
                   width: width,

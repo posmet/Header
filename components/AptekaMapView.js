@@ -9,6 +9,7 @@ import Common from './../Utilites/Common'
 import MapView, { AnimatedRegion, Marker, UrlTile } from 'react-native-maps';
 import Network, { searchPharms } from './../Utilites/Network'
 import Search from 'react-native-search-box';
+import { Constants, Location, Permissions } from 'expo';
 
 @observer
 export default class AptekaMapView extends React.Component {
@@ -30,19 +31,41 @@ export default class AptekaMapView extends React.Component {
   }
 
   componentDidMount() {
-    this.watchID = navigator.geolocation.watchPosition(
-      position => {
-        const { latitude, longitude } = position.coords;
+    Location.getProviderStatusAsync()
+      .then(status => {
+        if (!status.locationServicesEnabled) {
+          throw new Error('Location services disabled');
+        }
+      })
+      .then(_ => {
+        return Permissions.askAsync(Permissions.LOCATION);
+      })
+      .then(permissions => {
+        if (permissions.status !== 'granted') {
+          throw new Error('Ask for permissions');
+        }
+      })
+      .then(_ => {
+        this.watchID = navigator.geolocation.watchPosition(
+          position => {
+            const { latitude, longitude } = position.coords;
 
-        const newCoordinate = {
-          latitude,
-          longitude
-        };
-        this.changePosition(newCoordinate);
-      },
-      error => console.log(error),
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 1000 }
-    );
+            const newCoordinate = {
+              latitude,
+              longitude
+            };
+            this.changePosition(newCoordinate);
+          },
+          error => console.log(error),
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 1000 }
+        );
+      })
+      .catch(error => {
+        console.log(error);
+        this.setState({
+          errorMessage: 'Permission to access location was denied',
+        });
+      });
   }
 
   componentWillUnmount() {
@@ -66,7 +89,6 @@ export default class AptekaMapView extends React.Component {
   };
 
   navigateMap = (newCoordinate) => {
-    console.log('navigate');
     this.refs.map._component.animateToCoordinate(newCoordinate || this.state.curPos, 1);
   };
 
@@ -96,7 +118,7 @@ export default class AptekaMapView extends React.Component {
         console.log('onChangeText', text);
         searchPharms(text)
         .then(() => {
-          this.refs.map.fitToElements(true);
+          // this.refs.map._component.fitToElements(true);
         })
         .catch(() => {
 
@@ -109,7 +131,7 @@ export default class AptekaMapView extends React.Component {
     return new Promise((resolve, reject) => {
         console.log('onCancel');
         Network.pharmsList = Network.pharmsList2;
-        this.refs.map.fitToElements(true);
+        // this.refs.map._component.fitToElements(true);
         resolve();
     });
   };

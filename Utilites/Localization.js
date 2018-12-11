@@ -2,7 +2,7 @@ import I18n from 'ex-react-native-i18n';
 import { DangerZone } from 'expo';
 
 I18n.initAsync = async () => {
-  const locale = await Expo.Localization.locale;
+  const locale = await Expo.DangerZone.Localization.getCurrentLocaleAsync();
   I18n.locale = (locale) ? locale.replace(/_/, '-') : '';
 };
 

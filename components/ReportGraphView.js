@@ -3,15 +3,7 @@ import { Platform, Text, Image, View, Dimensions } from 'react-native';
 import Colors from './../constants/Colors';
 import Config from './../constants/Config'
 import Common from './../Utilites/Common'
-import {
-  LineChart,
-  BarChart,
-  PieChart,
-  ProgressChart,
-  ContributionGraph
-} from 'react-native-chart-kit';
 import { VictoryChart, VictoryLine, VictoryTheme, VictoryVoronoiContainer, VictoryAxis, VictoryZoomContainer, VictoryContainer, VictoryScatter, VictoryLabel, VictoryTooltip, VictoryGroup } from 'victory-native';
-import Svg from 'react-native-svg';
 
 let colors = ['#f44336', '#9c27b0', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722', '#795548', '#9e9e9e', '#607d8b'];
 
@@ -51,45 +43,13 @@ export default class ReportGraphScreen extends React.Component {
     const chartPaddingLeft = 60;
     const chartPaddingTop = 45;
 
-    console.log('length: ' + length, data);
+    console.log('length: ' + length);
     length = length + 3;
     // console.log('props: ' + JSON.stringify(this.props));
-    return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        width: Dimensions.get('window').width,
-        height: Common.getLengthByIPhone7(221),
-      }}>
-      {/*<LineChart
-        data={{
-          labels: this.props.datax,
-          datasets: data
-        }}
-        rowx={this.props.rowx}
-        rowy={this.props.rowy}
-        width={Dimensions.get('window').width - Common.getLengthByIPhone7(20)}
-        height={Common.getLengthByIPhone7(221)}
-        chartConfig={{
-          backgroundColor: Colors.backgroundColor,
-          backgroundGradientFrom: Colors.backgroundColor,
-          backgroundGradientTo: Colors.backgroundColor,
-          color: (opacity = 1) => Colors.mainColor,
-          linesColor: (opacity = 1) => 'rgba(112, 112, 112, 0.1)',
-          style: {
 
-          }
-        }}
-        bezier
-        style={{
-          marginVertical: 8,
-        }}
-      />*/}
-        <Svg width={chartWidth} height={Common.getLengthByIPhone7(221)} viewBox={`0 0 ${chartWidth} ${Common.getLengthByIPhone7(221)}`} style={{ width: "100%", height: "auto" }}>
+    return (
+      <View>
           <VictoryChart
-            standalone={false}
             width={chartWidth}
             height={Common.getLengthByIPhone7(221)}
             containerComponent={<VictoryContainer
@@ -98,10 +58,6 @@ export default class ReportGraphScreen extends React.Component {
               onTouchEnd={this.props.toggleScrolling}
             />}
             theme={VictoryTheme.material}
-            animate={{
-              duration: 1000,
-              onLoad: { duration: 500 }
-            }}
             padding={{left: chartPaddingLeft, bottom: 50, top: chartPaddingTop, right: 15}}
           >
             <VictoryAxis
@@ -134,10 +90,9 @@ export default class ReportGraphScreen extends React.Component {
               data.map((report, index) => {
                 return (
                   <VictoryGroup
-                    standalone={false}
                     key={index.toString()}
                     data={this.props.datax.map((v, i) => ({x: v, y: report.data[i] || 0, label: report.data[i] || 0}))}
-                    labelComponent={<VictoryTooltip renderInPortal={false} />}
+                    labelComponent={<VictoryTooltip />}
                   >
                     <VictoryLine
                       interpolation="monotoneX"
@@ -172,7 +127,6 @@ export default class ReportGraphScreen extends React.Component {
               })
             }
           </VictoryChart>
-        </Svg>
       </View>
     );
   }

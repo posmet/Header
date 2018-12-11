@@ -4,39 +4,36 @@
   "dependencies": {
     "@ptomasroos/react-native-multi-slider": "0.0.12",
     "ex-react-native-i18n": "0.0.3",
-    "expo": "*",
+    "expo": "^30.0.0",
     "frisbee": "*",
     "mobx": "^4.3.1",
     "mobx-react": "^5.1.0",
     "moment": "^2.20.1",
     "pouchdb-react-native": "*",
     "prop-types": "^15.6.0",
-    "react": "16.6.3",
-    "react-native": "^0.57.7",
+    "react": "16.3.1",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-30.0.0.tar.gz",
     "react-native-actionsheet": "^2.3.0",
-    "react-native-chart-kit": "^1.2.1",
     "react-native-datepicker": "^1.6.0",
     "react-native-i18n": "^2.0.12",
     "react-native-iphone-x-helper": "^1.0.2",
     "react-native-loading-spinner-overlay": "*",
-    "react-native-maps": "*",
     "react-native-root-modal": "*",
     "react-native-search-box": "*",
-    "react-native-svg": "^8.0.8",
-    "react-navigation": "^3.0.4",
-    "victory-native": "^31.0.0"
+    "react-navigation": "^2.13.0",
+    "victory-native": "^31.0.0",
+    "whatwg-fetch": "^2.0.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.1.5",
-    "@babel/core": "^7.1.6",
-    "@babel/plugin-proposal-decorators": "^7.1.6",
-    "@babel/runtime": "^7.1.5",
+    "babel-preset-expo": "^4.0.0",
+    "babel-core": "^7.0.0-bridge.0",
     "babel-plugin-module-resolver": "^3.1.1",
     "metro-react-native-babel-preset": "^0.45.0",
+    "regenerator-runtime": "^0.13.1",
     "schedule": "^0.4.0"
   },
   "resolutions": {
-    "react-native-svg": "8.0.8"
+    "react-native-svg": "6.2.2"
   },
   "scripts": {
     "start": "%expo-cli% start",

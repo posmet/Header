@@ -3,13 +3,6 @@ import { Platform, Text, Image, View, Dimensions } from 'react-native';
 import Colors from './../constants/Colors';
 import Config from './../constants/Config'
 import Common from './../Utilites/Common'
-import {
-  LineChart,
-  BarChart,
-  PieChart,
-  ProgressChart,
-  ContributionGraph
-} from 'react-native-chart-kit';
 
 import { VictoryChart, VictoryTheme, VictoryAxis, VictoryVoronoiContainer, VictoryZoomContainer, VictoryContainer, VictoryLabel, VictoryTooltip, VictoryGroup, VictoryStack, VictoryBar } from 'victory-native';
 import Svg from 'react-native-svg';
@@ -49,7 +42,7 @@ export default class ReportHistogramView extends React.Component {
       }
     }
 
-    console.log('length: ' + length, data);
+    console.log('length: ' + length);
     length = length + 3;
 
     const chartWidth = Dimensions.get('window').width - Common.getLengthByIPhone7(20);
@@ -62,15 +55,7 @@ export default class ReportHistogramView extends React.Component {
     // }
 
     return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        // width: Common.getLengthByIPhone7(0),
-        width: Dimensions.get('window').width,
-        height: Common.getLengthByIPhone7(221),
-      }}>
+      <View>
         {/*<BarChart
           data={{
             labels: this.props.datax,
@@ -93,9 +78,7 @@ export default class ReportHistogramView extends React.Component {
             }
           }}
         />*/}
-        <Svg width={chartWidth} height={Common.getLengthByIPhone7(221)} viewBox={`0 0 ${chartWidth} ${Common.getLengthByIPhone7(221)}`} style={{ width: "100%", height: "auto" }}>
           <VictoryChart
-            standalone={false}
             width={chartWidth}
             height={Common.getLengthByIPhone7(221)}
             containerComponent={<VictoryContainer
@@ -104,10 +87,6 @@ export default class ReportHistogramView extends React.Component {
               onTouchEnd={this.props.toggleScrolling}
             />}
             theme={VictoryTheme.material}
-            animate={{
-              duration: 1000,
-              onLoad: { duration: 500 }
-            }}
             padding={{left: chartPaddingLeft, bottom: 50, top: chartPaddingTop, right: 15}}
           >
             <VictoryAxis
@@ -137,11 +116,10 @@ export default class ReportHistogramView extends React.Component {
               }}
             />
             <VictoryGroup
-              standalone={false}
               offset={5}
               colorScale={colors}
               padding={{left: chartPaddingLeft, bottom: 50, top: chartPaddingTop, right: 15}}
-              labelComponent={<VictoryTooltip renderInPortal={false} />}
+              labelComponent={<VictoryTooltip />}
             >
               {
                 data.map((report, index) => {
@@ -198,7 +176,6 @@ export default class ReportHistogramView extends React.Component {
               }
             </VictoryGroup>
           </VictoryChart>
-        </Svg>
       </View>
     );
   }
