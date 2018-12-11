@@ -20,7 +20,7 @@ class CustomLabel extends React.Component {
         <VictoryTooltip
           {...this.props}
           style={tooltipStyle}
-          text={`${datum.name}\n${datum.y}`}
+          text={`${datum.name}\n${datum.y}%`}
           orientation="top"
           pointerLength={5}
           height={40}
