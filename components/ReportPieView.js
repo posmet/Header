@@ -15,12 +15,17 @@ class CustomLabel extends React.Component {
     const { datum, y, style } = this.props;
     const tooltipStyle = Object.assign({}, style);
     tooltipStyle.fill = 'black';
+    console.log(this.props);
     return (
       <G>
+        <VictoryLabel
+          {...this.props}
+          text={`${Math.round(datum.y/datum.total*100)}%`}
+        />
         <VictoryTooltip
           {...this.props}
           style={tooltipStyle}
-          text={`${datum.name}\n${datum.y}%`}
+          text={`${datum.name}\n${datum.y}`}
           orientation="top"
           pointerLength={5}
           height={40}
@@ -48,9 +53,11 @@ export default class ReportPieView extends React.Component {
   render() {
 
     let data = [];
+    let total = 0;
 
     for(let i=0;i<this.props.data.length;i++) {
       let value = this.props.data[i].vals[this.props.data[i].vals.length - 1];
+      total += value;
       data.push({name: this.props.data[i].name, value: value, color: colors[i], y: value, label: value, radius: 50});
     }
 
@@ -97,7 +104,11 @@ export default class ReportPieView extends React.Component {
             labels={(d) => d.y}
             radius={d => d.radius}
             colorScale={colors}
-            data={data}
+            data={data.map(item => {
+              item.total = total;
+              item.count = data.length;
+              return item;
+            })}
             events={[{
               target: "data",
               eventHandlers: {
@@ -111,8 +122,10 @@ export default class ReportPieView extends React.Component {
                     },
                     {
                       target: "data",
-                      mutation: () => {
-                        return {radius: 40};
+                      mutation: (props) => {
+                        return {
+                          radius: 40,
+                        };
                       }
                     }
                   ];
