@@ -6,6 +6,7 @@ import { AsyncStorage, Platform } from 'react-native';
 import Frisbee from 'frisbee';
 import Config from './../constants/Config';
 import PouchDB from 'pouchdb-react-native';
+import _ from 'lodash';
 
 class Network extends React.Component {
 
@@ -14,6 +15,25 @@ class Network extends React.Component {
   @observable pharmsList2 = [];
   @observable reportsList = [];
   @observable commonReportsList = [];
+
+  @observable pharmsSort = 'id';
+  @observable pharmsPage = 1;
+  @observable loading = false;
+  pharmsPerPage = 20;
+  @computed get pharmsListSorted() {
+    let array = _.sortBy(this.pharmsList, this.pharmsSort);
+    return array.splice(0, this.pharmsPerPage * this.pharmsPage);
+  }
+
+  setSort(sort) {
+    this.loading = true;
+    setTimeout(() => {
+      this.pharmsSort = sort;
+    }, 0);
+    setTimeout(() => {
+      this.loading = false;
+    }, 1000);
+  }
 
   constructor(props) {
     super(props);
@@ -68,10 +88,11 @@ export function login(login, password) {
     })
     .then((response) => {
       console.log('body22: ' + JSON.stringify(response));
-      if(response.body.err === 'forbiden') {
-        reject('Логин и пароль не верны!');
+      const { status } = response.originalResponse;
+      if (status > 400) {
         AsyncStorage.setItem('@MySuperStore:login', '');
         AsyncStorage.setItem('@MySuperStore:password', '');
+        reject(status === 404 ? 'Логин и пароль не верны!' : 'Неизвестная ошибка. Повторите снова.');
       } else {
         AsyncStorage.setItem('@MySuperStore:login', login);
         AsyncStorage.setItem('@MySuperStore:password', password);
@@ -123,10 +144,15 @@ export function signout() {
 export function searchPharms(text) {
   return new Promise(function(resolve, reject) {
     let array = network.pharmsList2;
-    let result = array.filter(obj => obj.name.indexOf(text) != -1);
-    let result2 = array.filter(obj => obj.id.toString().indexOf(text) != -1);
+    let splits = text.split(' ').filter(item => item && item.trim().length).map(item => item.trim());
+    let reg = new RegExp(splits.join('|'), 'gi');
+    let result = array.filter(obj => {
+      let match = obj.name.match(reg);
+      return match && match.length >= splits.length;
+    });
+    let result2 = array.filter(obj => obj.id.toString().indexOf(text) !== -1);
 
-    for(let i=0;i<result2.length;i++) {
+    for (let i=0; i < result2.length; i++) {
       let isExist = false;
       for(let y=0;y<result.length;y++) {
         if(result2[i].id == result[y].id) {
@@ -149,7 +175,7 @@ export function getPharms() {
     api.get('/pharms', {
     })
     .then((response) => {
-      // console.log('body: ' + JSON.stringify(response));
+      // console.log('body: ' + JSON.stringify(response.body));
       let body = JSON.parse(response.body);
       network.pharmsList = body.list;
       network.pharmsList2 = body.list;

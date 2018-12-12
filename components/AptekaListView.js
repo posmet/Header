@@ -7,6 +7,82 @@ import { observer } from 'mobx-react/native';
 import Common from './../Utilites/Common'
 import Network, { searchPharms } from './../Utilites/Network'
 import Search from 'react-native-search-box';
+import Spinner from 'react-native-loading-spinner-overlay';
+
+class MyListItem extends React.PureComponent {
+  render() {
+    const { item, index, onAptekaPress } = this.props;
+    return (
+      <TouchableOpacity onPress={onAptekaPress.bind(onAptekaPress, item.id, item.name)} style={{
+        width: Common.getLengthByIPhone7(343),
+        height: Common.getLengthByIPhone7(70),
+      }}>
+        <View style={{
+          height: Common.getLengthByIPhone7(70) - 1,
+          maxWidth: Common.getLengthByIPhone7(343),
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+        }}>
+          <Text style={{
+            fontFamily: 'FuturaNewMediumReg',
+            textAlign: 'left',
+            fontSize: Common.getLengthByIPhone7(20),
+            color: Colors.textColor,
+            lineHeight: Common.getLengthByIPhone7(28),
+          }}
+                numberOfLines={1}>
+            {index+1}
+          </Text>
+          <Image
+            defaultSource={require('./../assets/ic-placeholder-small.jpeg')}
+            source={{uri: `${Config.apiDomain}/${item.pic}`}}
+            style={{
+              resizeMode: 'cover',
+              width: Common.getLengthByIPhone7(50),
+              height: Common.getLengthByIPhone7(50),
+              marginLeft: Common.getLengthByIPhone7(10),
+            }} />
+          <View style={{
+            marginLeft: Common.getLengthByIPhone7(10),
+            marginRight: Common.getLengthByIPhone7(16),
+            maxWidth: Common.getLengthByIPhone7(250),
+          }}>
+            <Text style={{
+              fontFamily: 'FuturaNewMediumReg',
+              textAlign: 'left',
+              fontSize: Common.getLengthByIPhone7(20),
+              color: Colors.textColor,
+              lineHeight: Common.getLengthByIPhone7(28),
+            }}
+                  numberOfLines={1}>
+              {item.id} {item.name}
+            </Text>
+            <Text style={{
+              fontFamily: 'RoadRadio',
+              textAlign: 'left',
+              fontSize: Common.getLengthByIPhone7(10),
+              color: Colors.textColor,
+              // lineHeight: Common.getLengthByIPhone7(28),
+              opacity: 0.5,
+            }}
+                  numberOfLines={2}>
+              {item.addr}
+            </Text>
+          </View>
+        </View>
+        <View style={{
+          width: Common.getLengthByIPhone7(343),
+          height: 1,
+          backgroundColor: Colors.borderColor,
+          opacity: 0.1,
+        }}>
+        </View>
+      </TouchableOpacity>
+    )
+  }
+}
+
 
 @observer
 export default class AptekaListView extends React.Component {
@@ -17,6 +93,10 @@ export default class AptekaListView extends React.Component {
 
   componentWillMount() {
 
+  }
+
+  componentWillUnmount() {
+    Network.pharmsPage = 1;
   }
 
   constructor(props) {
@@ -60,77 +140,13 @@ export default class AptekaListView extends React.Component {
     }
   }
 
-  _renderItem = (item, index) => {
-    // console.log('item: '+index);
-    return (
-      <TouchableOpacity onPress={() => this.onAptekaPress(item.id, item.name)} style={{
-        width: Common.getLengthByIPhone7(343),
-        height: Common.getLengthByIPhone7(70),
-      }}>
-        <View style={{
-          height: Common.getLengthByIPhone7(70) - 1,
-          maxWidth: Common.getLengthByIPhone7(343),
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-        }}>
-          <Text style={{
-            fontFamily: 'FuturaNewMediumReg',
-            textAlign: 'left',
-            fontSize: Common.getLengthByIPhone7(20),
-            color: Colors.textColor,
-            lineHeight: Common.getLengthByIPhone7(28),
-          }}
-          numberOfLines={1}>
-            {index+1}
-          </Text>
-          <Image
-            defaultSource={require('./../assets/ic-placeholder-small.jpeg')}
-            source={{uri: Config.apiDomain + '/' + item.pic}}
-            style={{
-              resizeMode: 'cover',
-              width: Common.getLengthByIPhone7(50),
-              height: Common.getLengthByIPhone7(50),
-              marginLeft: Common.getLengthByIPhone7(10),
-            }} />
-          <View style={{
-            marginLeft: Common.getLengthByIPhone7(10),
-            marginRight: Common.getLengthByIPhone7(16),
-            maxWidth: Common.getLengthByIPhone7(250),
-          }}>
-            <Text style={{
-              fontFamily: 'FuturaNewMediumReg',
-              textAlign: 'left',
-              fontSize: Common.getLengthByIPhone7(20),
-              color: Colors.textColor,
-              lineHeight: Common.getLengthByIPhone7(28),
-            }}
-            numberOfLines={1}>
-              {item.id} {item.name}
-            </Text>
-            <Text style={{
-              fontFamily: 'RoadRadio',
-              textAlign: 'left',
-              fontSize: Common.getLengthByIPhone7(10),
-              color: Colors.textColor,
-              // lineHeight: Common.getLengthByIPhone7(28),
-              opacity: 0.5,
-            }}
-            numberOfLines={2}>
-              {item.addr}
-            </Text>
-          </View>
-        </View>
-        <View style={{
-          width: Common.getLengthByIPhone7(343),
-          height: 1,
-          backgroundColor: Colors.borderColor,
-          opacity: 0.1,
-        }}>
-        </View>
-      </TouchableOpacity>
-    );
-  }
+  _renderItem = ({item, index}) => {
+    return <MyListItem
+      item={item}
+      index={index}
+      onAptekaPress={this.onAptekaPress}
+    />
+  };
 
   render() {
 
@@ -191,10 +207,11 @@ export default class AptekaListView extends React.Component {
         </View>
         <View style={{
           width: Dimensions.get('window').width,
-          alignItems: 'flex-start',
-          justifyContent: 'flex-start',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           top: Common.getLengthByIPhone7(74),
           position: 'absolute',
+          flexDirection: 'row',
         }}>
           <Text style={{
             fontFamily: 'RodchenkoCondensedBold',
@@ -206,6 +223,85 @@ export default class AptekaListView extends React.Component {
           }}>
             Список Аптек
           </Text>
+          <View style={{
+            justifyContent: 'flex-end',
+            marginRight: Common.getLengthByIPhone7(16),
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+            <TouchableOpacity onPress={() => Network.setSort('id')} style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: Common.getLengthByIPhone7(7),
+              borderWidth: 2,
+              borderColor: Colors.mainColor,
+              borderRadius: Common.getLengthByIPhone7(4),
+              borderStyle: 'solid',
+              backgroundColor: Network.pharmsSort === 'id' ? Colors.mainColor : 'transparent',
+            }}>
+              <Text
+                adjustsFontSizeToFit={true}
+                numberOfLines={1}
+                style={{
+                  width: Common.getLengthByIPhone7(26),
+                  height: Common.getLengthByIPhone7(26),
+                  textAlignVertical: "center",
+                  textAlign: "center",
+                  fontFamily: 'RodchenkoCondRegular',
+                  color: Network.pharmsSort === 'id' ? '#fff' : Colors.mainColor,
+                }}
+              >
+                ID
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Network.setSort('name')} style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 2,
+              borderColor: Colors.mainColor,
+              borderRadius: Common.getLengthByIPhone7(4),
+              borderStyle: 'solid',
+              backgroundColor: Network.pharmsSort === 'name' ? Colors.mainColor : 'transparent',
+            }}>
+              <Text
+                adjustsFontSizeToFit={true}
+                numberOfLines={1}
+                style={{
+                  width: Common.getLengthByIPhone7(26),
+                  height: Common.getLengthByIPhone7(26),
+                  textAlignVertical: "center",
+                  textAlign: "center",
+                  fontFamily: 'RodchenkoCondRegular',
+                  color: Network.pharmsSort === 'name' ? '#fff' : Colors.mainColor,
+                }}
+              >
+                A
+              </Text>
+            </TouchableOpacity>
+            {/*<TouchableOpacity onPress={() => Network.pharmsSort = 'number'} style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 2,
+              borderColor: Colors.mainColor,
+              borderRadius: Common.getLengthByIPhone7(4),
+              borderStyle: 'solid',
+            }}>
+              <Text
+                adjustsFontSizeToFit={true}
+                numberOfLines={1}
+                style={{
+                  width: Common.getLengthByIPhone7(26),
+                  height: Common.getLengthByIPhone7(26),
+                  textAlignVertical: "center",
+                  textAlign: "center",
+                  fontFamily: 'RodchenkoCondRegular',
+                  color: Network.pharmsSort === 'id' ? '#fff' : Colors.mainColor,
+                }}
+              >
+                #
+              </Text>
+            </TouchableOpacity>*/}
+          </View>
         </View>
         <FlatList
           style={{
@@ -222,10 +318,22 @@ export default class AptekaListView extends React.Component {
             alignItems: 'center',
             // width: Common.getLengthByIPhone7(343),
           }}
+          onEndReached={() => Network.pharmsPage = Network.pharmsPage + 1}
+          onEndReachedThreshold={50}
+          initialNumToRender={7}
           scrollEventThrottle={16}
-          data={Network.pharmsList}
+          data={Network.pharmsListSorted}
           keyExtractor={(item, index) => item.id.toString()}
-          renderItem={({item, index}) => this._renderItem(item, index)}
+          renderItem={this._renderItem}
+          getItemLayout={(data, index) => (
+            {length: Common.getLengthByIPhone7(70), offset: Common.getLengthByIPhone7(70) * index, index}
+          )}
+        />
+        <Spinner
+          visible={Network.loading}
+          textContent={"Загрузка..."}
+          overlayColor={'rgba(32, 42, 91, 0.3)'}
+          textStyle={{color: '#FFF'}}
         />
     </View>
     );
